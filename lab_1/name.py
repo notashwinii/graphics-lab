@@ -1,83 +1,129 @@
-import pygame  # For window creation and event handling
-from pygame.locals import DOUBLEBUF, OPENGL  # OpenGL-specific pygame constants
-from OpenGL.GL import *  # OpenGL functions
-from OpenGL.GLU import gluPerspective  # GLU utility for setting up perspective
-from OpenGL.GLUT import glutInit, glutStrokeCharacter, glutStrokeWidth, GLUT_STROKE_ROMAN  # GLUT for text rendering
+from OpenGL.GL import *
+from OpenGL.GLUT import *
+from OpenGL.GLU import *
+
+# Window size
+width, height = 800, 500
+
+
+def draw_A(x, y, size):
+    # Draw letter A using lines
+    glBegin(GL_LINES)
+    glVertex2f(x, y)
+    glVertex2f(x + size / 2, y + size)
+    glVertex2f(x + size, y)
+    glVertex2f(x + size / 2, y + size)
+    glVertex2f(x + size * 0.2, y + size * 0.5)
+    glVertex2f(x + size * 0.8, y + size * 0.5)
+    glEnd()
+
+
+def draw_S(x, y, size):
+    # Draw letter S using lines
+    glBegin(GL_LINE_STRIP)
+    glVertex2f(x + size, y + size)
+    glVertex2f(x, y + size)
+    glVertex2f(x, y + size / 2)
+    glVertex2f(x + size, y + size / 2)
+    glVertex2f(x + size, y)
+    glVertex2f(x, y)
+    glEnd()
+
+
+def draw_H(x, y, size):
+    # Draw letter H using lines
+    glBegin(GL_LINES)
+    glVertex2f(x, y)
+    glVertex2f(x, y + size)
+    glVertex2f(x + size, y)
+    glVertex2f(x + size, y + size)
+    glVertex2f(x, y + size / 2)
+    glVertex2f(x + size, y + size / 2)
+    glEnd()
+
+
+def draw_W(x, y, size):
+    # Draw letter W using lines
+    glBegin(GL_LINES)
+    glVertex2f(x, y + size)
+    glVertex2f(x + size * 0.25, y)
+    glVertex2f(x + size * 0.25, y)
+    glVertex2f(x + size * 0.5, y + size * 0.7)
+    glVertex2f(x + size * 0.5, y + size * 0.7)
+    glVertex2f(x + size * 0.75, y)
+    glVertex2f(x + size * 0.75, y)
+    glVertex2f(x + size, y + size)
+    glEnd()
+
+
+def draw_I(x, y, size):
+    # Draw letter I using lines
+    glBegin(GL_LINES)
+    glVertex2f(x + size / 2, y)
+    glVertex2f(x + size / 2, y + size)
+    glEnd()
+
+
+def draw_N(x, y, size):
+    # Draw letter N using lines
+    glBegin(GL_LINES)
+    glVertex2f(x, y)
+    glVertex2f(x, y + size)
+    glVertex2f(x, y + size)
+    glVertex2f(x + size, y)
+    glVertex2f(x + size, y)
+    glVertex2f(x + size, y + size)
+    glEnd()
+
+
+def display():
+    glClear(GL_COLOR_BUFFER_BIT)
+    glColor3f(0, 0, 0.5)
+    glLineWidth(5)
+
+    # Starting x position and spacing
+    x = 50
+    y = 100
+    size = 60
+    spacing = 30
+
+    # Draw each letter with spacing
+    draw_A(x, y, size)
+    x += size + spacing
+    draw_S(x, y, size)
+    x += size + spacing
+    draw_H(x, y, size)
+    x += size + spacing
+    draw_W(x, y, size)
+    x += size + spacing
+    draw_I(x, y, size)
+    x += size + spacing
+    draw_N(x, y, size)
+    x += size + spacing
+    draw_I(x, y, size)
+
+    glFlush()
+
+
+def reshape(w, h):
+    glViewport(0, 0, w, h)
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    gluOrtho2D(0, width, 0, height)
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
 
 
 def main():
-    # Initialize pygame
-    pygame.init()
-
-    # Set up display dimensions
-    display_width, display_height = 800, 600
-    display = (display_width, display_height)
-
-    # Create a window with OpenGL
-    pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
-    pygame.display.set_caption("OpenGL Text Rendering - ASHWINI")
-
-    # Initialize GLUT for text rendering capabilities
     glutInit()
-
-    # field of view, aspect ratio, near clipping plane, far clipping plane
-    gluPerspective(45, (display_width / display_height), 0.5, 50.0)
-
-    # Move the scene away from the camera
-    glTranslatef(0.0, 0.0, -15)
-
-    # background color
-    glClearColor(0.8, 0.78, 0.69, 1.0)
-
-    # Text to display
-    text = "ASHWINI"
-
-    # Calculate text width
-    text_scale = 0.02
-    text_width = 0
-    for char in text:
-        text_width += glutStrokeWidth(GLUT_STROKE_ROMAN, ord(char))
-    text_width *= text_scale
-
-    # Main application loop
-    running = True
-    while running:
-        # Event handling
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    running = False
-
-        # Clear the screen and depth buffer
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-
-        # Set text color
-        glColor3f(0, 0, 0)
-
-        # Set line width for the stroke font
-        glLineWidth(4.0)
-
-        # Draw text centered
-        glPushMatrix()
-        # Position text at center by offsetting by half the text width
-        glTranslatef(-text_width / 2, 0, 0)
-        glScalef(0.02, 0.02, 0.02)
-        # Render each character in "ASHWINI"
-        for character in text:
-            glutStrokeCharacter(GLUT_STROKE_ROMAN, ord(character))
-
-        glPopMatrix()
-
-        # Swap the buffers to display what was rendered
-        pygame.display.flip()
-
-        # Control the frame rate
-        pygame.time.wait(10)
-
-    # Clean up and exit
-    pygame.quit()
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB)
+    glutInitWindowSize(width, height)
+    glutInitWindowPosition(100, 100)
+    glutCreateWindow("Draw ASHWINI ")
+    glClearColor(1, 1, 1, 1)
+    glutDisplayFunc(display)
+    glutReshapeFunc(reshape)
+    glutMainLoop()
 
 
 if __name__ == "__main__":
