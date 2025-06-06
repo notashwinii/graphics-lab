@@ -1,131 +1,150 @@
-from OpenGL.GL import *
-from OpenGL.GLUT import *
-from OpenGL.GLU import *
-
-# Window size
-width, height = 800, 500
+import OpenGL.GL as gl
+import OpenGL.GLUT as glut
+import sys
 
 
-def draw_A(x, y, size):
-    # Draw letter A using lines
-    glBegin(GL_LINES)
-    glVertex2f(x, y)
-    glVertex2f(x + size / 2, y + size)
-    glVertex2f(x + size, y)
-    glVertex2f(x + size / 2, y + size)
-    glVertex2f(x + size * 0.2, y + size * 0.5)
-    glVertex2f(x + size * 0.8, y + size * 0.5)
-    glEnd()
+def draw_rectangle(x, y, width, height):
+    """Draw a filled rectangle"""
+    gl.glBegin(gl.GL_QUADS)
+    gl.glVertex2f(x, y)
+    gl.glVertex2f(x + width, y)
+    gl.glVertex2f(x + width, y + height)
+    gl.glVertex2f(x, y + height)
+    gl.glEnd()
 
 
-def draw_S(x, y, size):
-    # Draw letter S using lines
-    glBegin(GL_LINE_STRIP)
-    glVertex2f(x + size, y + size)
-    glVertex2f(x, y + size)
-    glVertex2f(x, y + size / 2)
-    glVertex2f(x + size, y + size / 2)
-    glVertex2f(x + size, y)
-    glVertex2f(x, y)
-    glEnd()
+def draw_letter_A(x, y, size):
+    """Draw letter A using rectangles"""
+    # Left vertical bar
+    draw_rectangle(x, y, size / 8, size)
+    # Right vertical bar
+    draw_rectangle(x + 7 * size / 8, y, size / 8, size)
+    # Top horizontal bar
+    draw_rectangle(x + size / 8, y + 7 * size / 8, 6 * size / 8, size / 8)
+    # Middle horizontal bar
+    draw_rectangle(x + size / 8, y + size / 2, 6 * size / 8, size / 8)
 
 
-def draw_H(x, y, size):
-    # Draw letter H using lines
-    glBegin(GL_LINES)
-    glVertex2f(x, y)
-    glVertex2f(x, y + size)
-    glVertex2f(x + size, y)
-    glVertex2f(x + size, y + size)
-    glVertex2f(x, y + size / 2)
-    glVertex2f(x + size, y + size / 2)
-    glEnd()
+def draw_letter_S(x, y, size):
+    """Draw letter S using rectangles"""
+    # Top horizontal bar
+    draw_rectangle(x, y + 7 * size / 8, size, size / 8)
+    # Top left vertical
+    draw_rectangle(x, y + size / 2, size / 8, 3 * size / 8)
+    # Middle horizontal bar
+    draw_rectangle(x, y + 3 * size / 8, size, size / 8)
+    # Bottom right vertical
+    draw_rectangle(x + 7 * size / 8, y, size / 8, 3 * size / 8)
+    # Bottom horizontal bar
+    draw_rectangle(x, y, size, size / 8)
 
 
-def draw_W(x, y, size):
-    # Draw letter W using lines
-    glBegin(GL_LINES)
-    glVertex2f(x, y + size)
-    glVertex2f(x + size * 0.25, y)
-    glVertex2f(x + size * 0.25, y)
-    glVertex2f(x + size * 0.5, y + size * 0.7)
-    glVertex2f(x + size * 0.5, y + size * 0.7)
-    glVertex2f(x + size * 0.75, y)
-    glVertex2f(x + size * 0.75, y)
-    glVertex2f(x + size, y + size)
-    glEnd()
+def draw_letter_H(x, y, size):
+    """Draw letter H using rectangles"""
+    # Left vertical bar
+    draw_rectangle(x, y, size / 8, size)
+    # Right vertical bar
+    draw_rectangle(x + 7 * size / 8, y, size / 8, size)
+    # Horizontal bar
+    draw_rectangle(x + size / 8, y + size / 2, 6 * size / 8, size / 8)
 
 
-def draw_I(x, y, size):
-    # Draw letter I using lines
-    glBegin(GL_LINES)
-    glVertex2f(x + size / 2, y)
-    glVertex2f(x + size / 2, y + size)
-    glEnd()
+def draw_letter_W(x, y, size):
+    """Draw letter W using rectangles"""
+    # Left vertical bar
+    draw_rectangle(x, y, size / 8, size)
+    # Right vertical bar
+    draw_rectangle(x + 7 * size / 8, y, size / 8, size)
+
+    # Left diagonal (going from bottom-left to top-center)
+    draw_rectangle(x + size / 8, y + size / 8, size / 8, size / 8)
+    draw_rectangle(x + 2 * size / 8, y + 2 * size / 8, size / 8, size / 8)
+    draw_rectangle(x + 2.5 * size / 8, y + 3 * size / 8, size / 8, size / 8)
+    draw_rectangle(x + 3 * size / 8, y + 4 * size / 8, size / 8, size / 8)
+
+    # Right diagonal (going from top-center to bottom-right)
+    draw_rectangle(x + 3.5 * size / 8, y + 4 * size / 8, size / 8, size / 8)
+    draw_rectangle(x + 4 * size / 8, y + 3 * size / 8, size / 8, size / 8)
+    draw_rectangle(x + 5 * size / 8, y + 2 * size / 8, size / 8, size / 8)
+    draw_rectangle(x + 6 * size / 8, y + size / 8, size / 8, size / 8)
 
 
-def draw_N(x, y, size):
-    # Draw letter N using lines
-    glBegin(GL_LINES)
-    glVertex2f(x, y)
-    glVertex2f(x, y + size)
-    glVertex2f(x, y + size)
-    glVertex2f(x + size, y)
-    glVertex2f(x + size, y)
-    glVertex2f(x + size, y + size)
-    glEnd()
+def draw_letter_I(x, y, size):
+    """Draw letter I using rectangles"""
+    # Top horizontal bar
+    draw_rectangle(x, y + 7 * size / 8, size, size / 8)
+    # Middle vertical bar
+    draw_rectangle(x + 3 * size / 8, y, 2 * size / 8, size)
+    # Bottom horizontal bar
+    draw_rectangle(x, y, size, size / 8)
+
+
+def draw_letter_N(x, y, size):
+    """Draw letter N using rectangles"""
+    # Left vertical bar
+    draw_rectangle(x, y, size / 8, size)
+    # Right vertical bar
+    draw_rectangle(x + 7 * size / 8, y, size / 8, size)
+    # Diagonal using properly positioned rectangles
+    draw_rectangle(x + size / 8, y + 6 * size / 8, size / 8, size / 8)
+    draw_rectangle(x + 2 * size / 8, y + 5 * size / 8, size / 8, size / 8)
+    draw_rectangle(x + 3 * size / 8, y + 4 * size / 8, size / 8, size / 8)
+    draw_rectangle(x + 4 * size / 8, y + 3 * size / 8, size / 8, size / 8)
+    draw_rectangle(x + 5 * size / 8, y + 2 * size / 8, size / 8, size / 8)
+    draw_rectangle(x + 6 * size / 8, y + size / 8, size / 8, size / 8)
 
 
 def display():
-    glClear(GL_COLOR_BUFFER_BIT)
-    glColor3f(0, 0, 0.5)
-    glLineWidth(5)
+    """Main display function"""
+    gl.glClear(gl.GL_COLOR_BUFFER_BIT)
 
-    # Starting x position and spacing
-    x = 50
-    y = 100
-    size = 60
-    spacing = 30
+    # Set color to cyan
+    gl.glColor3f(0.0, 1.0, 1.0)
 
-    # Draw each letter with spacing
-    draw_A(x, y, size)
-    x += size + spacing
-    draw_S(x, y, size)
-    x += size + spacing
-    draw_H(x, y, size)
-    x += size + spacing
-    draw_W(x, y, size)
-    x += size + spacing
-    draw_I(x, y, size)
-    x += size + spacing
-    draw_N(x, y, size)
-    x += size + spacing
-    draw_I(x, y, size)
+    # Letter parameters
+    letter_size = 60
+    spacing = 80
+    start_x = -280
+    start_y = -30
 
-    glFlush()
+    # Draw ASHWINI
+    draw_letter_A(start_x, start_y, letter_size)
+    draw_letter_S(start_x + spacing, start_y, letter_size)
+    draw_letter_H(start_x + 2 * spacing, start_y, letter_size)
+    draw_letter_W(start_x + 3 * spacing, start_y, letter_size)
+    draw_letter_I(start_x + 4 * spacing, start_y, letter_size)
+    draw_letter_N(start_x + 5 * spacing, start_y, letter_size)
+    draw_letter_I(start_x + 6 * spacing, start_y, letter_size)
+
+    glut.glutSwapBuffers()
 
 
-def reshape(w, h):
-    glViewport(0, 0, w, h)
-    glMatrixMode(GL_PROJECTION)
-    glLoadIdentity()
-    gluOrtho2D(0, width, 0, height)
-    glMatrixMode(GL_MODELVIEW)
-    glLoadIdentity()
+def reshape(width, height):
+    """Handle window reshape"""
+    gl.glViewport(0, 0, width, height)
+    gl.glMatrixMode(gl.GL_PROJECTION)
+    gl.glLoadIdentity()
+    gl.glOrtho(-400, 400, -200, 200, -1, 1)
+    gl.glMatrixMode(gl.GL_MODELVIEW)
+    gl.glLoadIdentity()
 
 
 def main():
-    glutInit()
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB)
-    glutInitWindowSize(width, height)
-    glutInitWindowPosition(100, 100)
-    glutCreateWindow("Draw ASHWINI ")
-    glClearColor(1, 1, 1, 1)
-    glutDisplayFunc(display)
-    glutReshapeFunc(reshape)
-    glutMainLoop()
+    """Main function"""
+    glut.glutInit(sys.argv)
+    glut.glutInitDisplayMode(glut.GLUT_DOUBLE | glut.GLUT_RGB)
+    glut.glutInitWindowSize(800, 300)
+    glut.glutInitWindowPosition(100, 100)
+    glut.glutCreateWindow("ASHWINI")
+
+    # Set background color to dark blue
+    gl.glClearColor(0.1, 0.1, 0.3, 1.0)
+
+    glut.glutDisplayFunc(display)
+    glut.glutReshapeFunc(reshape)
+
+    glut.glutMainLoop()
 
 
 if __name__ == "__main__":
     main()
-
