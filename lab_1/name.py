@@ -85,7 +85,7 @@ def draw_letter_N(x, y, size):
     draw_rectangle(x, y, size / 8, size)
     # Right vertical bar
     draw_rectangle(x + 7 * size / 8, y, size / 8, size)
-    # Diagonal using properly positioned rectangles
+    # Diagonal
     draw_rectangle(x + size / 8, y + 6 * size / 8, size / 8, size / 8)
     draw_rectangle(x + 2 * size / 8, y + 5 * size / 8, size / 8, size / 8)
     draw_rectangle(x + 3 * size / 8, y + 4 * size / 8, size / 8, size / 8)
