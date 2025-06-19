@@ -2,7 +2,6 @@ import pygame
 import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLU import *
-import math
 
 # --- Module 1: OpenGL Rendering ---
 
@@ -186,9 +185,8 @@ class TranslationDemo:
         self.ty = 0.0
 
         self.renderer = OpenGLRenderer(
-            1200, 900, "Enhanced Translation Demo - Extended Grid (-10 to +10)")
+            1200, 900, "translation")
         self.ui = UserInterface(self.original_line)
-        # GeometricTransformations methods are static, so no instance needed for now.
 
     def run(self):
         clock = pygame.time.Clock()
