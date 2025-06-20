@@ -9,7 +9,7 @@ class CompositeTransformDemo:
         pygame.init()
         self.screen = pygame.display.set_mode(
             (0, 0), pygame.OPENGL | pygame.DOUBLEBUF | pygame.FULLSCREEN)
-        self.width, self.height = self.screen.get_size()
+        self.width, self.height = 1400, 1000
         pygame.display.set_caption("2D Composite Transformations ")
 
         glClearColor(1.0, 1.0, 1.0, 1.0)

@@ -7,7 +7,7 @@ from OpenGL.GLU import *
 
 class RotationDemo:
     def __init__(self):
-        """Initialize the rotation demo with extended grid"""
+        """Initialize the rotation"""
         pygame.init()
 
         # Bigger window size
@@ -15,13 +15,13 @@ class RotationDemo:
         self.screen = pygame.display.set_mode(
             (self.width, self.height), pygame.OPENGL | pygame.DOUBLEBUF)
         pygame.display.set_caption(
-            "2D Rotation Demo - Extended Grid (-10 to +10)")
+            "2D Rotation ")
 
         # Set up OpenGL
-        glClearColor(1.0, 1.0, 1.0, 1.0)  # White background
+        glClearColor(1.0, 1.0, 1.0, 1.0)  
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        # Extended orthographic projection (-10 to +10 on both axes)
+        # orthographic projection (-10 to +10 on both axes)
         gluOrtho2D(-11, 11, -11, 11)
         glMatrixMode(GL_MODELVIEW)
 
