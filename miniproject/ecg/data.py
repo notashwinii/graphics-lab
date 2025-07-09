@@ -9,106 +9,115 @@ class ECGDataGenerator:
         """Initialize ECG data generator"""
         self.sample_rate = sample_rate
         self.heart_rate = heart_rate
-        self.beat_duration = 60.0 / heart_rate
-        self.current_time = 0.0
-        self.time_step = 1.0 / sample_rate
+        self.flatline = False
+        self.audio_on = True
+        self.current_waveform = []  # Holds samples for the current lub-dub
+        self.waveform_index = 0
+        self.display_length = sample_rate  # Number of points to display (e.g., 1 second)
 
-        # Buffer for display data (10 seconds)
-        self.buffer_size = sample_rate * 10
-        self.ecg_buffer = deque(maxlen=self.buffer_size)
+    def on_beat(self, bpm):
+        """Call this when a new audio beat occurs. Generates a full beat's worth of samples at the current BPM."""
+        beat_duration = 60.0 / bpm
+        num_samples = int(self.sample_rate * beat_duration)
+        self.current_waveform = [self.generate_ecg_sample(i / self.sample_rate, bpm) for i in range(num_samples)]
+        self.waveform_index = 0
+        self.last_bpm = bpm
 
-        # Initialize with baseline
-        for _ in range(self.buffer_size):
-            self.ecg_buffer.append(0.0)
-
-    def generate_ecg_sample(self, t):
-        """Generate realistic ECG waveform"""
-        # Calculate position within heartbeat cycle
-        beat_time = t % self.beat_duration
-        beat_phase = beat_time / self.beat_duration
+    def generate_ecg_sample(self, t, bpm=None):
+        """Generate a highly realistic ECG waveform (P, Q, R, S, T waves) for a single beat, with a prominent R wave and smaller P/T waves."""
+        if self.flatline or not self.audio_on:
+            return 0.0
+        if bpm is None:
+            bpm = self.heart_rate
+        beat_duration = 60.0 / bpm
+        beat_time = t % beat_duration
+        beat_phase = beat_time / beat_duration
 
         ecg_value = 0.0
 
-        # P wave (8-18% of cycle)
+        # P wave (smaller bump)
         if 0.08 <= beat_phase <= 0.18:
             p_center = 0.13
-            p_width = 0.04
-            p_amplitude = 0.2
+            p_width = 0.025
+            p_amplitude = 0.36  # doubled again
             p_pos = (beat_phase - p_center) / p_width
             ecg_value += p_amplitude * math.exp(-0.5 * p_pos**2)
 
-        # QRS complex (35-45% of cycle)
-        elif 0.35 <= beat_phase <= 0.45:
-            qrs_center = 0.4
+        # Q wave (deeper negative before spike)
+        if 0.20 <= beat_phase <= 0.23:
+            q_center = 0.215
+            q_width = 0.008
+            q_amplitude = -0.72  # doubled again
+            q_pos = (beat_phase - q_center) / q_width
+            ecg_value += q_amplitude * math.exp(-0.5 * q_pos**2)
 
-            # Q wave (negative deflection)
-            if 0.35 <= beat_phase <= 0.38:
-                q_amplitude = -0.15
-                q_width = 0.015
-                q_pos = (beat_phase - 0.365) / q_width
-                ecg_value += q_amplitude * math.exp(-0.5 * q_pos**2)
+        # R wave (taller spike)
+        if 0.23 <= beat_phase <= 0.27:
+            r_center = 0.25
+            r_width = 0.012
+            r_amplitude = 4.8  # doubled again
+            r_pos = (beat_phase - r_center) / r_width
+            ecg_value += r_amplitude * math.exp(-0.5 * r_pos**2)
 
-            # R wave (large positive spike)
-            elif 0.38 <= beat_phase <= 0.42:
-                r_amplitude = 1.2
-                r_width = 0.02
-                r_pos = (beat_phase - qrs_center) / r_width
-                ecg_value += r_amplitude * math.exp(-0.5 * r_pos**2)
+        # S wave (deeper negative after spike)
+        if 0.27 <= beat_phase <= 0.30:
+            s_center = 0.285
+            s_width = 0.01
+            s_amplitude = -1.2  # doubled again
+            s_pos = (beat_phase - s_center) / s_width
+            ecg_value += s_amplitude * math.exp(-0.5 * s_pos**2)
 
-            # S wave (negative after R)
-            else:
-                s_amplitude = -0.3
-                s_width = 0.015
-                s_pos = (beat_phase - 0.43) / s_width
-                ecg_value += s_amplitude * math.exp(-0.5 * s_pos**2)
-
-        # T wave (65-85% of cycle)
-        elif 0.65 <= beat_phase <= 0.85:
-            t_center = 0.75
-            t_width = 0.08
-            t_amplitude = 0.25
+        # T wave (smaller broad bump after spike)
+        if 0.38 <= beat_phase <= 0.48:
+            t_center = 0.43
+            t_width = 0.03
+            t_amplitude = 0.52  # doubled again
             t_pos = (beat_phase - t_center) / t_width
             ecg_value += t_amplitude * math.exp(-0.5 * t_pos**2)
 
-        # Add realistic noise
-        noise = np.random.normal(0, 0.015)
+        # Add a little noise for realism
+        noise = np.random.normal(0, 0.01)
         return ecg_value + noise
 
-    def update(self):
-        """Generate next ECG sample"""
-        new_sample = self.generate_ecg_sample(self.current_time)
-        self.ecg_buffer.append(new_sample)
-        self.current_time += self.time_step
-        return new_sample
+    def next_sample(self):
+        """Return the next sample: waveform if drawing, else flatline."""
+        if self.flatline or not self.audio_on:
+            return 0.0
+        if self.waveform_index < len(self.current_waveform):
+            val = self.current_waveform[self.waveform_index]
+            self.waveform_index += 1
+            return val
+        else:
+            return 0.0
 
     def get_display_data(self):
-        """Get ECG data for display"""
-        return list(self.ecg_buffer)
+        """Get the current display data for the renderer: the current waveform (if drawing), padded with flatline."""
+        data = []
+        for i in range(self.display_length):
+            if i < self.waveform_index and i < len(self.current_waveform):
+                data.append(self.current_waveform[i])
+            else:
+                data.append(0.0)
+        return data
 
     def calculate_heart_rate(self):
-        """Calculate heart rate from R-wave detection"""
-        data = list(self.ecg_buffer)[-self.sample_rate * 3:]  # Last 3 seconds
+        """Return the most recent BPM (from the last beat or audio heartbeat)."""
+        return getattr(self, 'last_bpm', self.heart_rate)
 
-        if len(data) < self.sample_rate:
-            return self.heart_rate
+    def generate_samples(self, num_samples, fps=60):
+        """On each frame, output one sample: from the beat queue if available, else flat (0.0)."""
+        for _ in range(int(num_samples)):
+            if self.flatline or not self.audio_on:
+                self.ecg_buffer.append(0.0)
+            elif self.beat_queue and self.beat_queue[0]:
+                self.ecg_buffer.append(self.beat_queue[0].pop(0))
+                if not self.beat_queue[0]:
+                    self.beat_queue.pop(0)
+            else:
+                self.ecg_buffer.append(0.0)
 
-        # Simple R-wave detection
-        peaks = []
-        threshold = 0.6
-        min_distance = int(0.4 * self.sample_rate)  # Min 0.4s between beats
-
-        for i in range(2, len(data) - 2):
-            if (data[i] > threshold and
-                data[i] > data[i - 1] and data[i] > data[i + 1] and
-                    data[i] > data[i - 2] and data[i] > data[i + 2]):
-
-                if not peaks or i - peaks[-1] >= min_distance:
-                    peaks.append(i)
-
-        if len(peaks) >= 2:
-            intervals = [peaks[i + 1] - peaks[i] for i in range(len(peaks) - 1)]
-            avg_interval = np.mean(intervals) / self.sample_rate
-            calculated_hr = 60.0 / avg_interval if avg_interval > 0 else self.heart_rate
-            return int(np.clip(calculated_hr, 30, 200))
-
-        return self.heart_rate
+    def set_timing(self, last_beat_time, bpm, audio_on):
+        self.last_beat_time = last_beat_time
+        self.current_bpm = bpm
+        self.audio_on = audio_on
+        self.flatline = not audio_on

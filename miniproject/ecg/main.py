@@ -131,14 +131,32 @@ class ECGVisualizerApp:
         try:
             self.init_glfw()
 
+            last_beat_time_seen = None
+            display_buffer = [0.0] * self.ecg_generator.display_length
             while not glfw.window_should_close(self.window):
                 glfw.poll_events()
 
-                # Update ECG data
-                self.ecg_generator.update()
+                # Sync ECG timing to audio heartbeat
+                if self.audio_enabled and self.heartbeat_audio.is_playing_heartbeat:
+                    self.ecg_generator.set_timing(
+                        self.heartbeat_audio.last_beat_time,
+                        self.heartbeat_audio.current_bpm,
+                        True
+                    )
+                    # Detect new beat and queue a new waveform
+                    if self.heartbeat_audio.last_beat_time != last_beat_time_seen:
+                        self.ecg_generator.on_beat(self.heartbeat_audio.current_bpm)
+                        last_beat_time_seen = self.heartbeat_audio.last_beat_time
+                else:
+                    self.ecg_generator.set_timing(None, self.ecg_generator.heart_rate, False)
+
+                # Get next sample and update display buffer
+                next_val = self.ecg_generator.next_sample()
+                display_buffer.pop(0)
+                display_buffer.append(next_val)
 
                 # Get display data
-                ecg_data = self.ecg_generator.get_display_data()
+                ecg_data = display_buffer
                 heart_rate = self.ecg_generator.calculate_heart_rate()
 
                 # Render frame

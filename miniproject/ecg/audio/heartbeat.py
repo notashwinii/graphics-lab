@@ -15,6 +15,7 @@ class HeartbeatAudio:
             self.is_playing = False
             self.current_bpm = 72
             self.audio_thread = None
+            self.is_playing_heartbeat = False
 
             # Generate heartbeat sound
             self.heartbeat_sound = self.generate_heartbeat_sound()
@@ -62,14 +63,17 @@ class HeartbeatAudio:
 
     def play_heartbeat_loop(self):
         """Play heartbeat sounds in a loop"""
+        self.is_playing_heartbeat = True
         while self.is_playing and self.heartbeat_sound:
             try:
                 self.heartbeat_sound.play()
+                self.last_beat_time = time.time()
                 beat_interval = 60.0 / self.current_bpm
                 time.sleep(beat_interval)
             except Exception as e:
                 print(f"Audio playback error: {e}")
                 break
+        self.is_playing_heartbeat = False
 
     def start_heartbeat(self, bpm=72):
         """Start playing heartbeat sounds"""
@@ -88,6 +92,7 @@ class HeartbeatAudio:
         self.is_playing = False
         if self.audio_thread:
             self.audio_thread.join(timeout=1.0)
+        self.is_playing_heartbeat = False
 
     def update_bpm(self, new_bpm):
         """Update heartbeat rate"""

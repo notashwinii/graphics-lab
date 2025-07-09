@@ -11,7 +11,7 @@ class ECGRenderer:
 
         # Display parameters
         self.samples_per_pixel = 2.0
-        self.voltage_scale = 150.0
+        self.voltage_scale = 600.0  # doubled again for even larger waveform
         self.scroll_speed = 1.0
 
         # Colors (RGB)
